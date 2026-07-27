@@ -1,11 +1,24 @@
-const express = require('express');
+const express = require("express");
+
 const app = express();
 const port = 3000;
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
+// Information about the API
+app.get("/", (req, res) => {
+    res.json({
+        name: "Task API",
+        version: "1.0",
+        endpoints: ["/tasks"]
+    });
+});
+
+// Check whether the server is running
+app.get("/health", (req, res) => {
+    res.json({
+        status: "ok"
+    });
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+    console.log(`Server running at http://localhost:${port}`);
 });
