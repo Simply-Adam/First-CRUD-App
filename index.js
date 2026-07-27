@@ -3,6 +3,9 @@ const express = require("express");
 const app = express();
 const port = 3000;
 
+app.use(express.json());
+
+
 // Temporary in-memory task list
 const tasks = [
     {
@@ -21,6 +24,8 @@ const tasks = [
         done: false
     }
 ];
+
+let nextId = 4;
 
 // Information about the API
 app.get("/", (req, res) => {
@@ -56,6 +61,30 @@ app.get("/tasks/:id", (req, res) => {
     }
 
     res.json(task);
+});
+
+
+// Create a new task
+app.post("/tasks", (req, res) => {
+    const title = req.body.title;
+
+    // Make sure the title is not empty
+    if (typeof title !== "string" || title.trim() === "") {
+        return res.status(400).json({
+            error: "Title is required and cannot be empty"
+        });
+    }
+
+    const newTask = {
+        id: nextId,
+        title: title.trim(),
+        done: false
+    };
+
+    nextId++;
+    tasks.push(newTask);
+
+    res.status(201).json(newTask);
 });
 
 app.listen(port, () => {
