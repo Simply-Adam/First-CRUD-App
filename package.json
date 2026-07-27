@@ -1,0 +1,16 @@
+{
+  "name": "week-2-first-crud-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+"scripts": {
+  "start": "node index.js"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "swagger-ui-express": "^5.0.1"
+  }
+}
