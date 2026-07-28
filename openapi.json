@@ -1,0 +1,159 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Task API",
+    "version": "1.0.0",
+    "description": "A simple CRUD API for managing tasks."
+    },
+
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+   ],
+
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Get API information",
+        "responses": {
+          "200": {
+            "description": "API information returned"
+          }
+        }
+      }
+    },
+
+    "/health": {
+      "get": {
+        "summary": "Check if the server is running",
+        "responses": {
+          "200": {
+            "description": "Server is running"
+          }
+        }
+      }
+    },
+
+    "/tasks": {
+      "get": {
+        "summary": "Get all tasks",
+        "responses": {
+          "200": {
+            "description": "Tasks returned successfully"
+          }
+        }
+      },
+
+      "post": {
+        "summary": "Create a new task",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "title": "Buy milk"
+              }
+            }
+          }
+        },
+
+        "responses": {
+          "201": {
+            "description": "Task created"
+          },
+
+          "400": {
+            "description": "Invalid task title"
+          }
+        }
+      }
+    },
+
+    "/tasks/{id}": {
+      "get": {
+        "summary": "Get one task",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+
+        "responses": {
+          "200": {
+            "description": "Task returned"
+          },
+          "404": {
+            "description": "Task not found"
+          }
+        }
+      },
+
+      "put": {
+        "summary": "Update a task",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "title": "Buy milk and bread",
+                "done": true
+              }
+            }
+          }
+        },
+
+        "responses": {
+          "200": {
+            "description": "Task updated"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "404": {
+            "description": "Task not found"
+          }
+        }
+      },
+
+      "delete": {
+        "summary": "Delete a task",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        
+        "responses": {
+          "204": {
+            "description": "Task deleted"
+          },
+          "404": {
+            "description": "Task not found"
+          }
+        }
+      }
+    }
+  }
+}
