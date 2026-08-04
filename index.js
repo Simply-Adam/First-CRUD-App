@@ -1,5 +1,6 @@
 const express = require("express");
 
+const Database = require("better-sqlite3");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./openapi.json");
 
@@ -9,6 +10,35 @@ const port = 3000;
 app.use(express.json());
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+//Database - Start
+    const db = new Database("tasks.db");
+
+
+    //Create the tasks table if it does not exist
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            done INTEGER NOT NULL DEFAULT 0
+        )
+    `).run();
+
+    // Check whether the table is empty
+    const taskCount = db.prepare("SELECT COUNT(*) AS count FROM tasks").get();
+
+    // Add the example tasks only on the first run
+    if (taskCount.count === 0) {
+        const insertTask = db.prepare(
+            "INSERT INTO tasks (title, done) VALUES (?, ?)"
+        );
+
+        insertTask.run("Learn Express", 1);
+        insertTask.run("Build a CRUD API", 0);
+        insertTask.run("Learn GitHub", 0);
+    }
+
+//Database - End
 
 // Temporary in-memory task list
 const tasks = [
