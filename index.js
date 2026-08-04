@@ -77,24 +77,37 @@ app.get("/health", (req, res) => {
     });
 });
 
-// Return all tasks
+// Return all tasks from the database
 app.get("/tasks", (req, res) => {
+    const rows = db.prepare("SELECT * FROM tasks").all();
+
+    const tasks = rows.map((task) => ({
+        id: task.id,
+        title: task.title,
+        done: Boolean(task.done)
+    }));
+
     res.json(tasks);
 });
 
-// Return one task using its ID
+
+// Return one task from the database
 app.get("/tasks/:id", (req, res) => {
     const taskId = Number(req.params.id);
 
-    const task = tasks.find((task) => task.id === taskId);
+    const task = db.prepare("SELECT * FROM tasks WHERE id = ?").get(taskId);
 
     if (!task) {
         return res.status(404).json({
-            error: `Task ${taskId} not found`
+            error: "Task not found"
         });
     }
 
-    res.json(task);
+    res.json({
+        id: task.id,
+        title: task.title,
+        done: Boolean(task.done)
+    });
 });
 
 
