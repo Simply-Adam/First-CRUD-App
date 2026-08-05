@@ -1,3 +1,15 @@
+Exploring SQLite
+
+I opened `tasks.db` using DB Browser for SQLite and ran SQL queries directly against the tasks table.
+
+```sql
+SELECT * FROM tasks WHERE done = 1;
+```
+
+![SQLite database opened in DB Browser](images/sqlite-database.png)
+
+
+
 This is a CRUD API created with Node.js and express. It has a memory array that stores tasks and provides an endpoint to create, read, updaye, and delete the tasks. I included swagger ui so that the API can be tested.
 
 Features: 
