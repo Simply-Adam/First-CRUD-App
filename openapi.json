@@ -38,9 +38,23 @@
     "/tasks": {
       "get": {
         "summary": "Get all tasks",
+        "parameters": [
+          {
+            "name": "done",
+            "in": "query",
+            "required": false,
+            "description": "Filter tasks by completion status",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Tasks returned successfully"
+          },
+          "400": {
+            "description": "Invalid done filter"
           }
         }
       },

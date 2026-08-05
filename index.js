@@ -57,9 +57,37 @@ app.get("/health", (req, res) => {
     });
 });
 
-// Return all tasks from the database
+
+// Return all tasks or filter them by status
 app.get("/tasks", (req, res) => {
-    const rows = db.prepare("SELECT * FROM tasks").all();
+    const doneFilter = req.query.done;
+    let rows;
+
+    // No filter: return every task
+    if (doneFilter === undefined) {
+        rows = db.prepare("SELECT * FROM tasks").all();
+    }
+
+    // Filter completed tasks
+    else if (doneFilter === "true") {
+        rows = db
+            .prepare("SELECT * FROM tasks WHERE done = ?")
+            .all(1);
+    }
+
+    // Filter unfinished tasks
+    else if (doneFilter === "false") {
+        rows = db
+            .prepare("SELECT * FROM tasks WHERE done = ?")
+            .all(0);
+    }
+
+    // Reject unsupported values
+    else {
+        return res.status(400).json({
+            error: "done must be true or false"
+        });
+    }
 
     const tasks = rows.map((task) => ({
         id: task.id,
