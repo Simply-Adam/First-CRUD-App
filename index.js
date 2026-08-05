@@ -20,7 +20,9 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
-            done INTEGER NOT NULL DEFAULT 0
+            done INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
     `).run();
 
@@ -92,7 +94,9 @@ app.get("/tasks", (req, res) => {
     const tasks = rows.map((task) => ({
         id: task.id,
         title: task.title,
-        done: Boolean(task.done)
+        done: Boolean(task.done),
+        created_at: task.created_at,
+        updated_at: task.updated_at
     }));
 
     res.json(tasks);
@@ -114,7 +118,9 @@ app.get("/tasks/:id", (req, res) => {
     res.json({
         id: task.id,
         title: task.title,
-        done: Boolean(task.done)
+        done: Boolean(task.done),
+        created_at: task.created_at,
+        updated_at: task.updated_at
     });
 });
 
@@ -137,7 +143,9 @@ app.post("/tasks", (req, res) => {
     res.status(201).json({
         id: newTask.id,
         title: newTask.title,
-        done: Boolean(newTask.done)
+        done: Boolean(newTask.done),
+        created_at: newTask.created_at,
+        updated_at: newTask.updated_at
     });
 });
 // Create a new task - End
@@ -190,7 +198,7 @@ app.put("/tasks/:id", (req, res) => {
 
     db.prepare(`
         UPDATE tasks
-        SET title = ?, done = ?
+        SET title = ?, done = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
     `).run(updatedTitle, updatedDone, taskId);
 
@@ -201,7 +209,9 @@ app.put("/tasks/:id", (req, res) => {
     res.json({
         id: updatedTask.id,
         title: updatedTask.title,
-        done: Boolean(updatedTask.done)
+        done: Boolean(updatedTask.done),
+        created_at: updatedTask.created_at,
+        updated_at: updatedTask.updated_at
     });
 });
 // Update a task - End
