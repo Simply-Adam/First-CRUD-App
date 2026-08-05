@@ -40,26 +40,6 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 //Database - End
 
-// Temporary in-memory task list
-const tasks = [
-    {
-        id: 1,
-        title: "Morning shower",
-        done: true
-    },
-    {
-        id: 2,
-        title: "Workout",
-        done: false
-    },
-    {
-        id: 3,
-        title: "Have lunch",
-        done: false
-    }
-];
-
-
 
 // Information about the API
 app.get("/", (req, res) => {
@@ -137,11 +117,15 @@ app.post("/tasks", (req, res) => {
 // Update a task - Start
 app.put("/tasks/:id", (req, res) => {
     const taskId = Number(req.params.id);
-    const task = tasks.find((task) => task.id === taskId);
 
-    if (!task) {
+    // Find the existing task first
+    const existingTask = db
+        .prepare("SELECT * FROM tasks WHERE id = ?")
+        .get(taskId);
+
+    if (!existingTask) {
         return res.status(404).json({
-            error: `Task ${taskId} not found`
+            error: "Task not found"
         });
     }
 
@@ -154,7 +138,7 @@ app.put("/tasks/:id", (req, res) => {
         });
     }
 
-    // Validate title when it is provided
+    // Validate title if it was provided
     if (
         title !== undefined &&
         (typeof title !== "string" || title.trim() === "")
@@ -164,22 +148,33 @@ app.put("/tasks/:id", (req, res) => {
         });
     }
 
-    // Validate done when it is provided
+    // Validate done if it was provided
     if (done !== undefined && typeof done !== "boolean") {
         return res.status(400).json({
             error: "Done must be true or false"
         });
     }
 
-    if (title !== undefined) {
-        task.title = title.trim();
-    }
+    // Keep the old value if a field was not provided
+    const updatedTitle = title !== undefined ? title.trim() : existingTask.title;
 
-    if (done !== undefined) {
-        task.done = done;
-    }
+    const updatedDone = done !== undefined ? Number(done) : existingTask.done;
 
-    res.json(task);
+    db.prepare(`
+        UPDATE tasks
+        SET title = ?, done = ?
+        WHERE id = ?
+    `).run(updatedTitle, updatedDone, taskId);
+
+    const updatedTask = db
+        .prepare("SELECT * FROM tasks WHERE id = ?")
+        .get(taskId);
+
+    res.json({
+        id: updatedTask.id,
+        title: updatedTask.title,
+        done: Boolean(updatedTask.done)
+    });
 });
 // Update a task - End
 
@@ -187,15 +182,13 @@ app.put("/tasks/:id", (req, res) => {
 app.delete("/tasks/:id", (req, res) => {
     const taskId = Number(req.params.id);
 
-    const taskIndex = tasks.findIndex((task) => task.id === taskId);
+    const result = db.prepare("DELETE FROM tasks WHERE id = ?").run(taskId);
 
-    if (taskIndex === -1) {
+    if (result.changes === 0) {
         return res.status(404).json({
-            error: `Task ${taskId} not found`
+            error: "Task not found"
         });
     }
-
-    tasks.splice(taskIndex, 1);
 
     res.status(204).send();
 });
