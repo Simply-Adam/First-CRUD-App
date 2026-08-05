@@ -59,7 +59,7 @@ const tasks = [
     }
 ];
 
-let nextId = 4;
+
 
 // Information about the API
 app.get("/", (req, res) => {
@@ -115,23 +115,22 @@ app.get("/tasks/:id", (req, res) => {
 app.post("/tasks", (req, res) => {
     const title = req.body.title;
 
-    // Make sure the title is not empty
+    // Make sure the title exists and is not empty
     if (typeof title !== "string" || title.trim() === "") {
         return res.status(400).json({
             error: "Title is required and cannot be empty"
         });
     }
 
-    const newTask = {
-        id: nextId,
-        title: title.trim(),
-        done: false
-    };
+    const result = db.prepare("INSERT INTO tasks (title, done) VALUES (?, ?)").run(title.trim(), 0);
 
-    nextId++;
-    tasks.push(newTask);
+    const newTask = db.prepare("SELECT * FROM tasks WHERE id = ?").get(result.lastInsertRowid);
 
-    res.status(201).json(newTask);
+    res.status(201).json({
+        id: newTask.id,
+        title: newTask.title,
+        done: Boolean(newTask.done)
+    });
 });
 // Create a new task - End
 
