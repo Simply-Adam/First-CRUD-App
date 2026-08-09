@@ -1,3 +1,14 @@
+## PostgreSQL with Docker
+
+For this stage, PostgreSQL runs inside a Docker container with a named volume so the database can persist between container restarts.
+
+Start the Postgres container with:
+
+```bash
+docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5432 -v taskdata:/var/lib/postgresql/data -d postgres:17
+```
+
+
 Exploring SQLite
 
 I opened `tasks.db` using DB Browser for SQLite and ran SQL queries directly against the tasks table.
