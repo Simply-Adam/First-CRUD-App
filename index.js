@@ -3,7 +3,11 @@ const express = require("express");
 const Database = require("better-sqlite3");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./openapi.json");
-const { setupDatabase } = require("./database");
+const {
+    setupDatabase,
+    getTasks,
+    getTaskById
+} = require("./database");
 
 const app = express();
 const port = 3000;
@@ -62,69 +66,46 @@ app.get("/health", (req, res) => {
 
 
 // Return all tasks or filter them by status
-app.get("/tasks", (req, res) => {
-    const doneFilter = req.query.done;
-    let rows;
+app.get("/tasks", async (req, res) => {
+    try {
+        const rows = await getTasks(req.query.done);
 
-    // No filter: return every task
-    if (doneFilter === undefined) {
-        rows = db.prepare("SELECT * FROM tasks").all();
-    }
+        if (rows === null) {
+            return res.status(400).json({
+                error: "done must be true or false"
+            });
+        }
 
-    // Filter completed tasks
-    else if (doneFilter === "true") {
-        rows = db
-            .prepare("SELECT * FROM tasks WHERE done = ?")
-            .all(1);
-    }
-
-    // Filter unfinished tasks
-    else if (doneFilter === "false") {
-        rows = db
-            .prepare("SELECT * FROM tasks WHERE done = ?")
-            .all(0);
-    }
-
-    // Reject unsupported values
-    else {
-        return res.status(400).json({
-            error: "done must be true or false"
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            error: "Database error"
         });
     }
-
-    const tasks = rows.map((task) => ({
-        id: task.id,
-        title: task.title,
-        done: Boolean(task.done),
-        created_at: task.created_at,
-        updated_at: task.updated_at
-    }));
-
-    res.json(tasks);
 });
 
+// Return one task
+app.get("/tasks/:id", async (req, res) => {
+    try {
+        const taskId = Number(req.params.id);
 
-// Return one task from the database
-app.get("/tasks/:id", (req, res) => {
-    const taskId = Number(req.params.id);
+        const task = await getTaskById(taskId);
 
-    const task = db.prepare("SELECT * FROM tasks WHERE id = ?").get(taskId);
+        if (!task) {
+            return res.status(404).json({
+                error: "Task not found"
+            });
+        }
 
-    if (!task) {
-        return res.status(404).json({
-            error: "Task not found"
+        res.json(task);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            error: "Database error"
         });
     }
-
-    res.json({
-        id: task.id,
-        title: task.title,
-        done: Boolean(task.done),
-        created_at: task.created_at,
-        updated_at: task.updated_at
-    });
 });
-
 
 // Create a new task - Start
 app.post("/tasks", (req, res) => {

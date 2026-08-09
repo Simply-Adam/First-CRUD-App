@@ -46,5 +46,49 @@ async function setupDatabase() {
 
 module.exports = {
     pool,
-    setupDatabase
+    setupDatabase,
+    getTasks,
+    getTaskById
 };
+
+// Get all tasks, optionally filtered by done status
+async function getTasks(doneFilter) {
+    if (doneFilter === undefined) {
+        const result = await pool.query(
+            "SELECT * FROM tasks ORDER BY id"
+        );
+
+        return result.rows;
+    }
+
+    if (doneFilter === "true") {
+        const result = await pool.query(
+            "SELECT * FROM tasks WHERE done = $1 ORDER BY id",
+            [true]
+        );
+
+        return result.rows;
+    }
+
+    if (doneFilter === "false") {
+        const result = await pool.query(
+            "SELECT * FROM tasks WHERE done = $1 ORDER BY id",
+            [false]
+        );
+
+        return result.rows;
+    }
+
+    return null;
+}
+
+
+// Get one task by id
+async function getTaskById(id) {
+    const result = await pool.query(
+        "SELECT * FROM tasks WHERE id = $1",
+        [id]
+    );
+
+    return result.rows[0];
+}
