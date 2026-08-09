@@ -1,3 +1,68 @@
+## Running the Project
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Simply-Adam/First-CRUD-App.git
+cd First-CRUD-App
+```
+
+### 2. Create the environment file
+
+Copy `.env.example` and rename the copy to `.env`.
+
+The environment variables used are:
+
+```env
+DATABASE_URL=postgres://postgres:YOUR_PASSWORD@localhost:5432/tasks
+POSTGRES_PASSWORD=YOUR_PASSWORD
+POSTGRES_DB=tasks
+```
+
+Replace `YOUR_PASSWORD` with the password you want to use for the local database.
+
+### 3. Start the application
+
+```bash
+docker compose up
+```
+
+Docker Compose starts both the Express API and PostgreSQL database.
+
+The API is available at:
+
+```text
+http://localhost:3000
+```
+
+Swagger documentation is available at:
+
+```text
+http://localhost:3000/docs
+```
+
+
+
+# Task API
+
+This is a CRUD API built using Node.js and Express for creating and managing tasks.
+
+The project originally used an in-memory list and was later moved to SQLite. The current version uses PostgreSQL running inside Docker.
+
+Docker Compose is used to start both the Express API and PostgreSQL database with one command.
+
+## Technologies Used
+
+- Node.js
+- Express
+- PostgreSQL
+- Docker
+- Docker Compose
+- Swagger UI
+- node-postgres (`pg`)
+
+
+
 ## PostgreSQL with Docker
 
 For this stage, PostgreSQL runs inside a Docker container with a named volume so the database can persist between container restarts.
@@ -8,52 +73,12 @@ Start the Postgres container with:
 docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5432 -v taskdata:/var/lib/postgresql/data -d postgres:17
 ```
 
+## Database Persistence
 
-Exploring SQLite
+PostgreSQL uses a Docker named volume called `taskdata`. This allows the task data to survive when the containers are stopped and recreated.
 
-I opened `tasks.db` using DB Browser for SQLite and ran SQL queries directly against the tasks table.
+For example, tasks created before running `docker compose down` are still available after running `docker compose up` again.
 
-```sql
-SELECT * FROM tasks WHERE done = 1;
-```
+## Task Timestamps
 
-![SQLite database opened in DB Browser](images/sqlite-database.png)
-
-
-
-This is a CRUD API created with Node.js and express. It has a memory array that stores tasks and provides an endpoint to create, read, updaye, and delete the tasks. I included swagger ui so that the API can be tested.
-
-Features: 
-Create new tasks, View tasks, View specifjic tasks by ID, update tasks, delete tasks, Validates POST and PUT requests, Returns the correct status codes.
-
-Installation
-
-    Clone the repository:
-
-    git clone https://github.com/Simply-Adam/First-CRUD-App.git
-
-    Move into the project folder:
-
-    cd First-CRUD-App
-
-    Install the required packages:
-
-    npm install
-    Run the Server
-
-    Start the API using:
-
-    npm start
-
-    The server runs at:
-
-    http://localhost:3000
-
-    Swagger UI is available at:
-
-    http://localhost:3000/docs
-
-
-Endpoints:
-
-![Swagger UI screenshot](images/swaggerUI.png)
+Each task stores a `created_at` timestamp for when it was created and an `updated_at` timestamp for the last time it was modified.
