@@ -44,12 +44,6 @@ async function setupDatabase() {
     }
 }
 
-module.exports = {
-    pool,
-    setupDatabase,
-    getTasks,
-    getTaskById
-};
 
 // Get all tasks, optionally filtered by done status
 async function getTasks(doneFilter) {
@@ -92,3 +86,52 @@ async function getTaskById(id) {
 
     return result.rows[0];
 }
+
+// Create a new task
+async function createTask(title) {
+    const result = await pool.query(
+        `INSERT INTO tasks (title, done)
+         VALUES ($1, $2)
+         RETURNING *`,
+        [title, false]
+    );
+
+    return result.rows[0];
+}
+
+
+// Update a task
+async function updateTask(id, title, done) {
+    const result = await pool.query(
+        `UPDATE tasks
+         SET title = $1,
+             done = $2,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = $3
+         RETURNING *`,
+        [title, done, id]
+    );
+
+    return result.rows[0];
+}
+
+
+// Delete a task
+async function deleteTask(id) {
+    const result = await pool.query(
+        "DELETE FROM tasks WHERE id = $1",
+        [id]
+    );
+
+    return result.rowCount;
+}
+
+module.exports = {
+    pool,
+    setupDatabase,
+    getTasks,
+    getTaskById,
+    createTask,
+    updateTask,
+    deleteTask
+};

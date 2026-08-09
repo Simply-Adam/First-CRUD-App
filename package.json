@@ -11,7 +11,6 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "better-sqlite3": "^13.0.2",
     "pg": "^8.23.0",
     "swagger-ui-express": "^5.0.1"
   }
