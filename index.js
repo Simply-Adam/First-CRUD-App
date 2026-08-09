@@ -3,6 +3,7 @@ const express = require("express");
 const Database = require("better-sqlite3");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./openapi.json");
+const { setupDatabase } = require("./database");
 
 const app = express();
 const port = 3000;
@@ -232,6 +233,16 @@ app.delete("/tasks/:id", (req, res) => {
 });
 // Delete a task - End
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+async function startServer() {
+    try {
+        await setupDatabase();
+
+        app.listen(port, () => {
+            console.log(`Server running at http://localhost:${port}`);
+        });
+    } catch (error) {
+        console.error("Database connection failed:", error.message);
+    }
+}
+
+startServer();
